@@ -45,7 +45,7 @@
 				<param name="ArduPlane" value="$(arg ArduPlane)"/>
 			</node>
 			<node if="$(arg log)" pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/> <!-- topic activity recorder node -->
-			<node pkg="last_letter" name="clock" type="simClock" output="screen"/>
+			<!-- <node pkg="last_letter" name="clock" type="simClock" output="screen"/> -->
 			<node pkg="last_letter" name="plane_model" type="model" output="screen" required="true"/>
 			<node pkg="last_letter" name="environment_model" type="environment" output="screen"/>
 			<node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/>
@@ -55,29 +55,7 @@
 		<group>
 			<!-- transform body NED to body NWU -->
 			<node pkg="tf" type="static_transform_publisher" name="body2Cockpit" args="0.0 0.0 0.0 0.0 0.0 3.14 base_link plane_camera 10" />
-			<!-- publish body NWU frame for rviz-->
-			<node pkg="last_letter" type="uav_publisher" name="broadcaster" />
 		</group>
-
-		<!-- Raising sensor nodes -->
-		<group>
-<!--			<node pkg="last_letter" name="Accelerometer" type="accelerometer.py" output="screen"/>-->
-<!--			<node pkg="last_letter" name="Altimeter" type="altimeter.py" output="screen"/>-->
-<!--			<node pkg="last_letter" name="Barometer" type="barometer.py" output="screen"/>-->
-<!--			<node pkg="last_letter" name="Gyroscope" type="gyroscope.py" output="screen"/>-->
-<!--			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>-->
-<!--			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>-->
-		</group>
-
-		<!-- Raising controller nodes -->
-		<group if="$(arg autoMode)">
-			<rosparam command="load" file="$(find last_letter)data/parameters/controllers/controller_HCUAV.yaml" />
-			<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
-		</group>
-		<!-- <group if="$(arg autoMode)">
-			<rosparam command="load" file="$(find last_letter)data/parameters/controllers/controller_ll.yaml" />
-			<node pkg="last_letter" name="Autopilot" type="autopilot_ll" output="screen"/>
-		</group> -->
 
 		<!-- Input nodes -->
 		<group if="$(arg manualMode)">

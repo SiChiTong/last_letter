@@ -61,12 +61,14 @@
 	{
 		geometry_msgs::Vector3 tempVect;
 
-		// Call gravity calculation routines
-		forceGrav = gravity->getForce();
-		if (isnan(forceGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity force vector"); ros::shutdown();}
+		// Unneded, Gazebo takes care of them
+		//
+		// // Call gravity calculation routines
+		// forceGrav = gravity->getForce();
+		// if (isnan(forceGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity force vector"); ros::shutdown();}
 
-		torqueGrav = gravity->getTorque();
-		if (isnan(torqueGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity torque vector"); ros::shutdown();}
+		// torqueGrav = gravity->getTorque();
+		// if (isnan(torqueGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity torque vector"); ros::shutdown();}
 
 
 		// Call  motors routines
@@ -118,17 +120,38 @@
 			torqueAero = tempVect + torqueAero;
 			// std::cout << " ||propulsion " << i << ": " << tempVect.x << " " << tempVect.y << " " << tempVect.z << std::endl;
 		}
-		// std::cout << "accumulator: " << torqueProp.x << " " << torqueProp.y << " " << torqueProp.z << std::endl;
-		// std::cout << std::endl;
 
-		// // Call aerodynamics routines
-		// forceAero = aerodynamics->getForce();
-		// if (isnan(forceAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics force vector"); ros::shutdown();}
-		// // std::cout << "aerodynamics: " << forceAero.x << " " << forceAero.y << " " << forceAero.z << std::endl;
+		// ROS_DEBUG_STREAM("dynamicsLib.cpp/calcWrench: forceAero.x:" << forceAero.x << "\tforceAero.y: " << forceAero.y << "\tforceAero.z: " << forceAero.z);
+		// ROS_DEBUG_STREAM("dynamicsLib.cpp/calcWrench: torqueAero.x:" << torqueAero.x << "\ttorqueAero.y: " << torqueAero.y << "\ttorqueAero.z: " << torqueAero.z);
 
-		// torqueAero = aerodynamics->getTorque();
-		// if (isnan(torqueAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics torque vector"); ros::shutdown();}
+		if (!std::isfinite(forceAero.x)) {ROS_FATAL("dynamicsLib.cpp/calcWrench: NaN value in forceAero.x"); ros::shutdown();}
+		if (std::fabs(forceAero.x)>10000) {ROS_FATAL("dynamicsLib.cpp/calcWrench: forceAero.x over 10000"); ros::shutdown();}
+		if (!std::isfinite(forceAero.y)) {ROS_FATAL("dynamicsLib.cpp/calcWrench: NaN value in forceAero.y"); ros::shutdown();}
+		if (std::fabs(forceAero.y)>10000) {ROS_FATAL("dynamicsLib.cpp/calcWrench: forceAero.y over 10000"); ros::shutdown();}
+		if (!std::isfinite(forceAero.z)) {ROS_FATAL("dynamicsLib.cpp/calcWrench: NaN value in forceAero.z"); ros::shutdown();}
+		if (std::fabs(forceAero.z)>10000) {ROS_FATAL("dynamicsLib.cpp/calcWrench: forceAero.z over 10000"); ros::shutdown();}
+		if (!std::isfinite(torqueAero.x)) {ROS_FATAL("dynamicsLib.cpp/calcWrench: NaN value in torqueAero.x"); ros::shutdown();}
+		if (std::fabs(torqueAero.x)>10000) {ROS_FATAL("dynamicsLib.cpp/calcWrench: torqueAero.x over 10000"); ros::shutdown();}
+		if (!std::isfinite(torqueAero.y)) {ROS_FATAL("dynamicsLib.cpp/calcWrench: NaN value in torqueAero.y"); ros::shutdown();}
+		if (std::fabs(torqueAero.y)>10000) {ROS_FATAL("dynamicsLib.cpp/calcWrench: torqueAero.y over 10000"); ros::shutdown();}
+		if (!std::isfinite(torqueAero.z)) {ROS_FATAL("dynamicsLib.cpp/calcWrench: NaN value in torqueAero.z"); ros::shutdown();}
+		if (std::fabs(torqueAero.z)>10000) {ROS_FATAL("dynamicsLib.cpp/calcWrench: torqueAero.z over 10000"); ros::shutdown();}
+		geometry_msgs::Wrench GazeboWrenchAero;
+		GazeboWrenchAero.force.x = forceAero.x;
+		GazeboWrenchAero.force.y = forceAero.y;
+		GazeboWrenchAero.force.z = forceAero.z;
+		GazeboWrenchAero.torque.x = torqueAero.x;
+		GazeboWrenchAero.torque.y = torqueAero.y;
+		GazeboWrenchAero.torque.z = torqueAero.z;
 
+		// Tet inputs
+		// ROS_DEBUG_STREAM("Input value: " << parentObj->input.value[1]);
+		// double testInput = parentObj->input.value[1];
+		// if (testInput<1000) testInput =1500;
+		// GazeboWrenchAero.force.z = ((double)(testInput-1500)/500)*100;
+
+
+		parentObj->pubAero.publish(GazeboWrenchAero);
 
 		// Call ground reactions routines - MUST BE CALLED LAST!!!
 		forceGround = groundReaction->getForce();
